@@ -79,9 +79,17 @@ function (angular, app, _, L, localRequire) {
        */
       spyable : true,
       /** @scratch /panels/bettermap/5
-       * tooltip:: Which field to use for the tooltip when hovering over a marker
+       * tooltip:: Javascript function body used for formatting the tooltip from the hit
        */
-      tooltip : "_id",
+      tooltip : "return hit._id",
+      /** @scratch /panels/bettermap/5
+       * sourceIncludes:: used to select the fields to include in the _source object in hits
+       */
+      sourceIncludes: '["*"]',
+      /** @scratch /panels/bettermap/5
+       * fieldExistFilter:: field used to further refine the dataset used in the map
+       */
+      fieldExistFilter: "@timestamp",
       /** @scratch /panels/bettermap/5
        *
        * ==== Queries
@@ -145,9 +153,12 @@ function (angular, app, _, L, localRequire) {
         var request = $scope.ejs.Request().indices(dashboard.indices[_segment])
           .query($scope.ejs.FilteredQuery(
             boolQuery,
-            filterSrv.getBoolFilter(filterSrv.ids()).must($scope.ejs.ExistsFilter($scope.panel.field))
+            filterSrv.getBoolFilter(filterSrv.ids())
+            .must($scope.ejs.ExistsFilter($scope.panel.field))
+            .must($scope.ejs.ExistsFilter($scope.panel.fieldExistFilter))
           ))
-          .fields([$scope.panel.field,$scope.panel.tooltip])
+          .fields([$scope.panel.field])
+          .source(angular.fromJson($scope.panel.sourceIncludes))
           .size($scope.panel.size);
 
         if(!_.isNull(timeField)) {
@@ -176,12 +187,12 @@ function (angular, app, _, L, localRequire) {
 
           // Check that we're still on the same query, if not stop
           if($scope.query_id === query_id) {
-
+            var tooltipFormatter = new Function('hit',$scope.panel.tooltip);
             // Keep only what we need for the set
             $scope.data = $scope.data.slice(0,$scope.panel.size).concat(_.map(results.hits.hits, function(hit) {
               return {
                 coordinates : new L.LatLng(hit.fields[$scope.panel.field][1],hit.fields[$scope.panel.field][0]),
-                tooltip : hit.fields[$scope.panel.tooltip]
+                tooltip : tooltipFormatter(hit)
               };
             }));
 
@@ -257,7 +268,11 @@ function (angular, app, _, L, localRequire) {
               if(!_.isUndefined(p.tooltip) && p.tooltip !== '') {
                 markerList.push(L.marker(p.coordinates).bindLabel(_.isArray(p.tooltip) ? p.tooltip[0] : p.tooltip));
               } else {
-                markerList.push(L.marker(p.coordinates));
+                markerList.push(L.marker(p.coordinates, {
+                  'icon':L.icon({
+                    iconUrl: 'app/panels/bettermap/leaflet/images/marker-grey-icon.png',
+                    iconRetinaUrl: 'app/panels/bettermap/leaflet/images/marker-grey-icon-2x.png'})
+                  }));
               }
             });
 

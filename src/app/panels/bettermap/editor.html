@@ -7,11 +7,26 @@
     </div>
     <div class="editor-option">
       <form>
-        <h6>Tooltip Field</h6>
-        <input  bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.tooltip">
+        <h6>Max Points</h6>
+        <input type="number" class="input-small" ng-model="panel.size">
       </form>
     </div>
-    <div class="editor-option"><h6>Max Points</h6>
-      <input type="number" class="input-small" ng-model="panel.size">
+    <div class="editor-option">
+      <form>
+        <h6>source includes <tip>as used in ES source filtering</tip></h6>
+        <input type="text" class="input-large" ng-model="panel.sourceIncludes">
+      </form>
+    </div>
+    <div class="editor-option">
+      <form>
+        <h6>field exist filter<tip>to refine the dataset used in the map</tip></h6>
+        <input type="text" class="input-large" ng-model="panel.fieldExistFilter">
+      </form>
+    </div>
+    <div class="editor-option">
+      <form>
+        <h6>Tooltip Renderer <tip>javascript function body gets the hit as a parameter</tip></h6>
+        <textarea  bs-typeahead="fields.list" type="text" class="textarea-medium" ng-model="panel.tooltip" rows="10" >
+      </form>
     </div>
   </div>

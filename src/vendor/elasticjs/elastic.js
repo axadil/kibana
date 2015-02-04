@@ -40,6 +40,7 @@
     isObject,
     isString,
     isNumber,
+    isBoolean,
     isFunction,
     isEJSObject, // checks if valid ejs object
     isQuery, // checks valid ejs Query object
@@ -205,6 +206,10 @@
   // switched to ===, not sure why underscore used ==
   isNumber = function (obj) {
     return toString.call(obj) === '[object Number]';
+  };
+
+  isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
   };
 
   // switched to ===, not sure why underscore used ==
@@ -19944,6 +19949,46 @@
           query.fields = fieldList;
         } else {
           throw new TypeError('Argument must be string or array');
+        }
+
+        return this;
+      },
+
+      /**
+            Allows to control how the _source field is returned with every hit.
+            By default operations return the contents of the _source field
+            unless you have used the fields parameter or if the _source field
+            is disabled.  Set the includes parameter to false to completely
+            disable returning the source field.
+            @member ejs.Request
+            @param {(String|Boolean|String[])} includes The field or list of fields to include as array.
+              Set to a boolean false to disable the source completely.
+            @param {(String|String[])} excludes The  optional field or list of fields to exclude.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      source: function (includes, excludes) {
+        if (includes == null && excludes == null) {
+          return query._source;
+        }
+
+        if (!isArray(includes) && !isString(includes) && !isBoolean(includes)) {
+          throw new TypeError('Argument includes must be a string, an array, or a boolean');
+        }
+
+        if (excludes != null && !isArray(excludes) && !isString(excludes)) {
+          throw new TypeError('Argument excludes must be a string or an array');
+        }
+
+        if (isBoolean(includes)) {
+          query._source = includes;
+        } else {
+          query._source = {
+            includes: includes
+          };
+
+          if (excludes != null) {
+            query._source.excludes = excludes;
+          }
         }
 
         return this;

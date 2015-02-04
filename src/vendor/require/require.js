@@ -1628,6 +1628,7 @@ var requirejs, require, define;
                 //all old browsers will be supported, but this one was easy enough
                 //to support and still makes sense.
                 if (evt.type === 'load' || (readyRegExp.test((evt.currentTarget || evt.srcElement).readyState))) {
+                    console.log(evt.path[0].src);
                     //Reset interactive script so a script node is not held onto for
                     //to long.
                     interactiveScript = null;
