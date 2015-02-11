@@ -10,8 +10,8 @@
     "dashboards",
     "dashboarding"
   ],
-  "private": false,
-  "version": "4.0.0-rc1-snapshot",
+  "private": true,
+  "version": "4.0.0-beta3-dil-1.1",
   "main": "src/server/app.js",
   "homepage": "http://www.elasticsearch.org/overview/kibana/",
   "bugs": {
