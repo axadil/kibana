@@ -65,13 +65,13 @@ define(function (require) {
           var specified = _.reduce(raw.rows, function (memo, num) { return memo + num[1]; }, 0);
           var notSpecifiedName = 'Not Specified';
           var notSpecifiedCount = split.hits - specified;
-           if (notSpecifiedCount > 0){
+          if (notSpecifiedCount > 0) {
             split.raw.rows = _.union(raw.rows, [[notSpecifiedName, notSpecifiedCount]]);
             split.names = _.union(split.names, [notSpecifiedName]);
             split.slices.children = _.union(
-                split.slices.children, [{'name': notSpecifiedName,
-                'size': notSpecifiedCount,
-                'aggConfig': split.slices.children[0].aggConfig}]);
+              split.slices.children, [{'name': notSpecifiedName,
+              'size': notSpecifiedCount,
+              'aggConfig': split.slices.children[0].aggConfig}]);
           }
         }
         split.tooltipFormatter = tooltipFormatter(raw.columns);
