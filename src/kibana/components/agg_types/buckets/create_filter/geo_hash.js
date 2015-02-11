@@ -1,14 +1,10 @@
 define(function (require) {
   var buildGeoBoundingBox = require('components/filter_manager/lib/geo_bounding_box');
   var decodeGeoHash = require('utils/decode_geo_hash');
+  var geoMapping = require('utils/geo_mapping');
+  var _ = require('lodash');
 
-  return function createGeohashFilterProvider(Private) {
-    return function (aggConfig, key) {
-      return buildGeoBoundingBox(createBoundingBoxContent(aggConfig.params.field.name, key), aggConfig.vis.indexPattern.id);
-    };
-  };
-
-    /**
+  /**
    * createBoundingBoxContent returns the contents object to be added
    * to the ES search based on the feature that has been select through a click
    *
@@ -32,4 +28,13 @@ define(function (require) {
     };
     return content;
   }
+
+
+  return function createGeohashFilterProvider(Private) {
+    return function (aggConfig, key) {
+      return buildGeoBoundingBox(createBoundingBoxContent(aggConfig.params.field.name, key),
+         aggConfig.vis.indexPattern.id, {'precision': geoMapping.computeOptimumPrecision(key), 'value': key});
+    };
+  };
+
 });

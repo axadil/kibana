@@ -13,7 +13,8 @@ define(function (require) {
       params: {
         defaults: {
           mapType: 'Shaded Circle Markers',
-          isDesaturated: true
+          isDesaturated: true,
+          isClickable: false
         },
         mapTypes: ['Shaded Circle Markers', 'Scaled Circle Markers'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
