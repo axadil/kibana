@@ -7,6 +7,8 @@ define(function (require) {
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
 
+    var geoMapping = require('utils/geo_mapping');
+
     require('css!components/vislib/styles/main');
 
     var mapData;
@@ -166,16 +168,17 @@ define(function (require) {
               $('img.leaflet-tile-loaded').addClass('filters-off');
             }
           }
-
-          // Adding the D3 Data and events on circleMarkers
-          map.eachLayer(function (layer) {
-            if (layer._radius !== undefined) {
-              d3.select(layer._path).datum(layer.feature.properties);
-              self.addPathEvents(d3.select(layer._path));
-            }
-          });
-          data.label = 'geo_bounding_box';
-          d3.select(map._pathRoot).datum(data);
+          if (self._attr.isClickable) {
+            // Adding the D3 Data and events on circleMarkers
+            map.eachLayer(function (layer) {
+              if (layer._radius !== undefined) {
+                d3.select(layer._path).datum(layer.feature.properties);
+                self.addPathEvents(d3.select(layer._path));
+              }
+            });
+            data.label = 'geo_bounding_box';
+            d3.select(map._pathRoot).datum(data);
+          }
         });
       };
     };
@@ -264,6 +267,22 @@ define(function (require) {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
           var rad = zoomScale * 3;
+          // FIXME here is an other fruitless attemp to resize Markers based on
+          // the size of the feature bounding box
+          if (!!(feature.properties.rectangle)) {
+            var rect = feature.properties.rectangle;
+            var memo = {'max': 0, 'previousCorner': null};
+            var max = _.reduce(rect, function (memo, corner) {
+              var max = memo.max;
+              if (null != memo.previousCorner) {
+                var previousPoint = map.project([memo.previousCorner[1], memo.previousCorner[0]], mapZoom);
+                var point = map.project([corner[1], corner[0]], mapZoom);
+                max = Math.max(Math.abs(previousPoint.x - point.x) / 2, Math.abs(previousPoint.y - point.y) / 2);
+              }
+              return {'previousCorner': corner, 'max': max};
+            }, memo);
+            rad = max.max;
+          }
           return L.circleMarker(latlng, {
             radius: rad
           });
@@ -403,6 +422,7 @@ define(function (require) {
           rad = zoomScale * self.radiusScale(count, max, precision);
         }
         layer.setRadius(rad);
+        //layer.setRadius(geoMapping.precisionGeohashGridMappings[precision][1]/10);
       });
     };
 

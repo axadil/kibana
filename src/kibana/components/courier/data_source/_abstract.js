@@ -303,12 +303,54 @@ define(function (require) {
             if (!!(filter.index)) {
               return filter.index === this.id;
             } else if (!!(filter.meta) && !!(filter.meta.index)) {
-              return filter.meta.index === this.id;
+              return !!(_.find(this.fields, function (f) { return f.name === filter.meta.key; }));
             } else if (!!(filter.geo_bounding_box)) {
               var field = _.keys(filter.geo_bounding_box)[0];
-              return true;
+              return _.has(this.fields.byName, field);
             }
             return true;
+          };
+
+
+          /**
+           * Merges filter options with the main query options
+           * Provides a hook to alter the query based on filters
+           * Useful for geo_hash aggregations, for defining
+           * precision size based on the geo_bounding_box size
+           * FIXME : this function needs to be generalized
+           * Right now it handles only the precsion merging for geohash_grid aggregation
+           */
+
+          var mergeFilterOptionsWithSearchOptions = function (filters, body) {
+            if (typeof body.aggs !== 'undefined') {
+              var geoBoundingBoxes = _.filter(filters, function (f) { return !!(f.geo_bounding_box); });
+              var locationIndiciesPrecisions = _.reduce(geoBoundingBoxes, function (res, f) {
+                if (!!(f.meta)) {
+                  if (!!(f.meta.precision)) {
+                    if (!!(res[f.meta.key])) {
+                      if (res[f.meta.key] < f.meta.precision) {
+                        res[f.meta.key] = f.meta.precision;
+                      }
+                    } else {
+                      res[f.meta.key] = f.meta.precision;
+                    }
+                  }
+                }
+                return res;
+              }, {});
+
+              // We updat ehere the precisions
+              _.each(body.aggs, function (agg, key) {
+                if (!!agg.geohash_grid) {
+                  if (!!this[agg.geohash_grid.field]) {
+                    agg.geohash_grid.precision = this[agg.geohash_grid.field];
+                  }
+                }
+                return {key: agg};
+              }, locationIndiciesPrecisions);
+
+            }
+            return body;
           };
 
           /**
@@ -342,6 +384,7 @@ define(function (require) {
                   }
                 }
               };
+              flatState.body = mergeFilterOptionsWithSearchOptions(flatState.filters, flatState.body);
             }
             delete flatState.filters;
           }

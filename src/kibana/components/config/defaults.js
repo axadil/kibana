@@ -57,7 +57,7 @@ define(function (require) {
       description: 'Never show more than this many bar in date histograms, scale values if needed',
     },
     'visualization:tileMap:maxPrecision': {
-      value: 6,
+      value: 8,
       description: 'The maximum geoHash size allowed in a tile map',
     },
     'csv:separator': {
