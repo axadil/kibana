@@ -6,12 +6,12 @@ module.exports = function (config) {
       //debug: true, // uncommment to prevent actual upload
       upload: [
         {
-          src: 'target/<%= pkg.name %>-<%= pkg.version %>.zip',
-          dest: 'kibana4/<%= pkg.name %>-<%= pkg.version %>.zip',
+          src: 'target/<%= pkg.name %>-<%= pkg.version %>-linux-x64.tar.gz',
+          dest: 'kibana4/<%= pkg.name %>-<%= pkg.version %>-linux-x64.tar.gz',
         },
         {
-          src: 'target/<%= pkg.name %>-<%= pkg.version %>.tar.gz',
-          dest: 'kibana4/<%= pkg.name %>-<%= pkg.version %>.tar.gz',
+          src: 'target/<%= pkg.name %>-<%= pkg.version %>-darwin-x64.tar.gz',
+          dest: 'kibana4/<%= pkg.name %>-<%= pkg.version %>-darwin-x64.tar.gz',
         }
       ]
     }
